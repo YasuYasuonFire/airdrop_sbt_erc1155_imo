@@ -7,7 +7,7 @@ import { ethers } from "ethers";
 import React, { useEffect, useState } from "react";
 
 import twitterLogo from "./assets/twitter-logo.svg";
-import myEpicNft from "./utils/MyEpicNFT.json";
+import MeetingSBT from "./utils/MeetingSBT.json";
 
 const TWITTER_HANDLE = "YasuYasu_onFire";
 const TWITTER_LINK = `https://twitter.com/${TWITTER_HANDLE}`;
@@ -15,14 +15,16 @@ const OPENSEA_LINK = "";
 const TOTAL_MINT_COUNT = 50;
 
 // コトントラクトアドレスをCONTRACT_ADDRESS変数に格納
-const CONTRACT_ADDRESS = "0xE6bF9e01b09E6a7d0a30Ec018b8A98cB4981C6DF";
+const CONTRACT_ADDRESS = "0x1D503b26b732789151e5348533626Fb9d73aD079";
 
 const App = () => {
   // ユーザーのウォレットアドレスを格納するために使用する状態変数を定義します。
   const [currentAccount, setCurrentAccount] = useState("");
+  //送信先のアドレス
+  const [addresses, setAddresses] = useState("");
 
   // setupEventListener 関数を定義します。
-  // MyEpicNFT.sol の中で event が　emit された時に、
+  // MeetingSBT.sol の中で event が　emit された時に、
   // 情報を受け取ります。
   const setupEventListener = async () => {
     try {
@@ -33,7 +35,7 @@ const App = () => {
         const signer = provider.getSigner();
         const connectedContract = new ethers.Contract(
           CONTRACT_ADDRESS,
-          myEpicNft.abi,
+          MeetingSBT.abi,
           signer
         );
 
@@ -109,7 +111,11 @@ const App = () => {
   };
 
   // NFT を Mint する関数を定義しています。
-  const askContractToMintNft = async () => {
+  const askContractToMintNft = async (event) => {
+    event.preventDefault()
+    //console.log(addresses);
+    const addresses_array = addresses.split(/\n/);
+    console.log(addresses_array);
     try {
       const { ethereum } = window;
 
@@ -118,12 +124,12 @@ const App = () => {
         const signer = provider.getSigner();
         const connectedContract = new ethers.Contract(
           CONTRACT_ADDRESS,
-          myEpicNft.abi,
+          MeetingSBT.abi,
           signer
         );
 
         console.log("Going to pop wallet now to pay gas...");
-        let nftTxn = await connectedContract.makeAnEpicNFT();
+        let nftTxn = await connectedContract.airDrop(addresses_array);
 
         console.log("Mining...please wait.");
         await nftTxn.wait();
@@ -154,22 +160,27 @@ const App = () => {
     </button>
   );
 
-  // Mint NFT ボタンをレンダリングするメソッドを定義します。
+  // 配布先アドレスの貼り付け欄、 AirDropボタンをレンダリングするメソッドを定義します。
   const renderMintUI = () => (
-    <button
-      onClick={askContractToMintNft}
-      className="cta-button connect-wallet-button"
-    >
-      Mint NFT
-    </button>
+    <><p className="normal-text">配布したい宛先のウォレットアドレスを入力</p><p className="normal-text">スプレッドシートからコピペOK</p>
+    <form method="post">
+      <textarea name="dist_address" id="dist_address" cols="42" rows="10" onChange={(e) => setAddresses(e.target.value)}></textarea><br></br><br></br>
+      <button
+        onClick={askContractToMintNft}
+        className="cta-button connect-wallet-button"
+        type='submit'
+      >
+        AirDrop!!
+      </button>
+    </form></>
   );
 
   return (
     <div className="App">
       <div className="container">
         <div className="header-container">
-          <p className="header gradient-text">web3 meeting NFT</p>
-          <p className="sub-text">参加を証明するNFTをMintしよう💫</p>
+          <p className="header gradient-text">web3 meeting SBT</p>
+          <p className="sub-text">【管理者用】参加を証明するSBTをAirDropします💫</p>
           {/*条件付きレンダリング。
           // すでにウォレット接続されている場合は、
           // Mint NFT を表示する。*/}
