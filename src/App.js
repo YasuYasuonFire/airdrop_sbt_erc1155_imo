@@ -15,7 +15,7 @@ const OPENSEA_LINK = "";
 const TOTAL_MINT_COUNT = 50;
 
 // コトントラクトアドレスをCONTRACT_ADDRESS変数に格納
-const CONTRACT_ADDRESS = "0xB00F3ba3fcf8D05bCdFbb62217d0d98b34EA4758";
+const CONTRACT_ADDRESS = "0x6247734188204961683D3ce9D450E0B59050a204";
 
 const App = () => {
   // ユーザーのウォレットアドレスを格納するために使用する状態変数を定義します。
@@ -134,9 +134,9 @@ const App = () => {
         console.log("Mining...please wait.");
         await nftTxn.wait();
         console.log(nftTxn);
-        console.log(
-          `Mined, see transaction: https://rinkeby.etherscan.io/tx/${nftTxn.hash}`
-        );
+        //console.log(
+        //  `Mined, see transaction: https://rinkeby.etherscan.io/tx/${nftTxn.hash}`
+        //);
       } else {
         console.log("Ethereum object doesn't exist!");
       }
