@@ -15,7 +15,7 @@ const OPENSEA_LINK = "";
 const TOTAL_MINT_COUNT = 50;
 
 // コトントラクトアドレスをCONTRACT_ADDRESS変数に格納
-const CONTRACT_ADDRESS = "0x6247734188204961683D3ce9D450E0B59050a204";
+const CONTRACT_ADDRESS = "0x31712F6c10ea64448F380630A7Aa758bc438935A";
 
 const App = () => {
   // ユーザーのウォレットアドレスを格納するために使用する状態変数を定義します。
@@ -179,7 +179,7 @@ const App = () => {
     <div className="App">
       <div className="container">
         <div className="header-container">
-          <p className="header gradient-text">web3 meeting SBT</p>
+          <p className="header gradient-text">web3 meeting SBT (for whose face revealed)</p>
           <p className="sub-text">【管理者用】参加を証明するSBTをAirDropします💫</p>
           {/*条件付きレンダリング。
           // すでにウォレット接続されている場合は、
