@@ -15,13 +15,19 @@ const OPENSEA_LINK = "";
 const TOTAL_MINT_COUNT = 50;
 
 // コトントラクトアドレスをCONTRACT_ADDRESS変数に格納
-const CONTRACT_ADDRESS = "0x31712F6c10ea64448F380630A7Aa758bc438935A";
+const CONTRACT_ADDRESS = "0xae8426c9ba369c71f1b2283e1afaaae65d72df0d";
 
 const App = () => {
   // ユーザーのウォレットアドレスを格納するために使用する状態変数を定義します。
   const [currentAccount, setCurrentAccount] = useState("");
   //送信先のアドレス
   const [addresses, setAddresses] = useState("");
+  //管理者を追加/削除、チェックするときに格納するアドレス
+  const [adminAddress, setAdminAddress] = useState("");
+  //管理者をチェックするときに格納するアドレス（画面表示用）
+  const [checkAddress, setCheckAddress] = useState("");
+  //管理者のチェック結果を格納する
+  const [checkResult, setCheckResult] = useState(false);
 
   // setupEventListener 関数を定義します。
   // MeetingSBT.sol の中で event が　emit された時に、
@@ -40,12 +46,12 @@ const App = () => {
         );
 
         // Event が　emit される際に、コントラクトから送信される情報を受け取っています。
-        connectedContract.on("NewEpicNFTMinted", (from, tokenId) => {
-          console.log(from, tokenId.toNumber());
-          alert(
-            `あなたのウォレットに NFT を送信しました。OpenSea に表示されるまで最大で10分かかることがあります。NFT へのリンクはこちらです: https://testnets.opensea.io/assets/${CONTRACT_ADDRESS}/${tokenId.toNumber()}`
-          );
-        });
+        // connectedContract.on("NewEpicNFTMinted", (from, tokenId) => {
+        //   console.log(from, tokenId.toNumber());
+        //   alert(
+        //     `あなたのウォレットに NFT を送信しました。OpenSea に表示されるまで最大で10分かかることがあります。NFT へのリンクはこちらです: https://testnets.opensea.io/assets/${CONTRACT_ADDRESS}/${tokenId.toNumber()}`
+        //   );
+        // });
 
         console.log("Setup event listener!");
       } else {
@@ -145,6 +151,95 @@ const App = () => {
     }
   };
 
+//管理者を追加する
+const AddAdmin = async(event) => {
+  event.preventDefault();
+  try {
+    const { ethereum } = window;
+
+    if (ethereum) {
+      const provider = new ethers.providers.Web3Provider(ethereum);
+      const signer = provider.getSigner();
+      const connectedContract = new ethers.Contract(
+        CONTRACT_ADDRESS,
+        MeetingSBT.abi,
+        signer
+      );
+      console.log(adminAddress);
+      
+      let nftTxn = await connectedContract.addAdmin(adminAddress);
+      await nftTxn.wait();
+    } else {
+      console.log("Ethereum object doesn't exist!");
+    }
+  } catch (error) {
+    console.log(error);
+  }
+
+};
+
+//管理者を削除する
+const DelAdmin = async(event) => {
+  event.preventDefault();
+  try {
+    const { ethereum } = window;
+
+    if (ethereum) {
+      const provider = new ethers.providers.Web3Provider(ethereum);
+      const signer = provider.getSigner();
+      const connectedContract = new ethers.Contract(
+        CONTRACT_ADDRESS,
+        MeetingSBT.abi,
+        signer
+      );
+      console.log(adminAddress);
+      
+      let nftTxn = await connectedContract.delAdmin(adminAddress);
+      await nftTxn.wait();
+    } else {
+      console.log("Ethereum object doesn't exist!");
+    }
+  } catch (error) {
+    console.log(error);
+  }
+
+};
+
+  //フォームに入力したアドレスが管理者かどうかを返す
+  const checkAdmin = async(event) => {
+    event.preventDefault();
+    try {
+      const { ethereum } = window;
+
+      if (ethereum) {
+        const provider = new ethers.providers.Web3Provider(ethereum);
+        //const signer = provider.getSigner();
+        const connectedContract = new ethers.Contract(
+          CONTRACT_ADDRESS,
+          MeetingSBT.abi,
+          provider
+        );
+        console.log(adminAddress);
+        //console.log("Going to pop wallet now to pay gas...");
+        let nftTxn = await connectedContract.checkAdmin(adminAddress);
+
+        //console.log("Mining...please wait.");
+        //await nftTxn.wait();
+        console.log(nftTxn);
+        //console.log(
+        //  `Mined, see transaction: https://rinkeby.etherscan.io/tx/${nftTxn.hash}`
+        //);
+        setCheckResult(nftTxn);
+        setCheckAddress(adminAddress);//結果表示のためアドレスを格納
+      } else {
+        console.log("Ethereum object doesn't exist!");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+
+  };
+
   // ページがロードされた際に下記が実行されます。
   useEffect(() => {
     checkIfWalletIsConnected();
@@ -164,7 +259,7 @@ const App = () => {
   const renderMintUI = () => (
     <><p className="normal-text">配布したい宛先のウォレットアドレスを入力</p><p className="normal-text">スプレッドシートからコピペOK</p>
     <form method="post">
-      <textarea name="dist_address" id="dist_address" cols="42" rows="10" onChange={(e) => setAddresses(e.target.value)}></textarea><br></br><br></br>
+      <textarea name="dist_address" id="dist_address" cols="42" rows="10" onChange={(e) => setAddresses(e.target.value)} placeholder="0xabc...&#13;0xdef..."></textarea><br></br><br></br>
       <button
         onClick={askContractToMintNft}
         className="cta-button connect-wallet-button"
@@ -172,14 +267,59 @@ const App = () => {
       >
         AirDrop!!
       </button>
-    </form></>
+    </form>
+    <br></br><br></br><br></br><br></br>
+
+    <p className="normal-text">管理者に追加するアドレスを入力</p>
+    <form method="post">
+      <input type="text" name="add_admin" id="add_admin" size="42" onChange={(e) => setAdminAddress(e.target.value)}></input><br></br><br></br>
+      <button
+        onClick={AddAdmin}
+        className="cta-button connect-wallet-button"
+        type='submit'
+      >
+        追加
+      </button>
+    </form>
+    <br></br><br></br>
+
+    <p className="normal-text">管理者から削除するアドレスを入力</p>
+    <form method="post">
+      <input type="text" name="del_admin" id="del_admin" size="42" onChange={(e) => setAdminAddress(e.target.value)}></input><br></br><br></br>
+      <button
+        onClick={DelAdmin}
+        className="cta-button connect-wallet-button"
+        type='submit'
+      >
+        削除
+      </button>
+    </form>
+    <br></br><br></br>
+    <br></br><br></br>
+
+    <p className="normal-text">アドレスが管理者であるかチェック</p>
+    <p className="normal-text">true:管理者 false:管理者でない</p>
+    <form method="post">
+      <input type="text" name="check_admin" id="check_admin" size="42" onChange={(e) => setAdminAddress(e.target.value)}></input><br></br><br></br>
+      <button
+        onClick={checkAdmin}
+        className="cta-button connect-wallet-button"
+        type='submit'
+      >
+        チェック
+      </button>
+    </form>
+    <p className="normal-text"> アドレス　{checkAddress ? checkAddress : "〇〇"}　のチェック結果は</p>
+    <p className="normal-text"> {checkResult ? "true" : "false"}</p>
+    </>
+
   );
 
   return (
     <div className="App">
       <div className="container">
         <div className="header-container">
-          <p className="header gradient-text">web3 meeting SBT (for whose face revealed)</p>
+          <p className="header gradient-text">SBT AirDrop Manager</p>
           <p className="sub-text">【管理者用】参加を証明するSBTをAirDropします💫</p>
           {/*条件付きレンダリング。
           // すでにウォレット接続されている場合は、
