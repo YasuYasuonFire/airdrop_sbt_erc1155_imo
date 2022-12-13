@@ -15,7 +15,7 @@ const OPENSEA_LINK = "";
 const TOTAL_MINT_COUNT = 50;
 
 // コトントラクトアドレスをCONTRACT_ADDRESS変数に格納
-const CONTRACT_ADDRESS = "0xae8426c9ba369c71f1b2283e1afaaae65d72df0d";
+const CONTRACT_ADDRESS = "0x512757897CBECf9E1669ADF5B21D5E5ca3ef92a6";
 
 const App = () => {
   // ユーザーのウォレットアドレスを格納するために使用する状態変数を定義します。
@@ -28,6 +28,8 @@ const App = () => {
   const [checkAddress, setCheckAddress] = useState("");
   //管理者のチェック結果を格納する
   const [checkResult, setCheckResult] = useState(false);
+  //mintするSBTのIDを格納する
+  const [mintID, setMintID] = useState("");
 
   // setupEventListener 関数を定義します。
   // MeetingSBT.sol の中で event が　emit された時に、
@@ -135,7 +137,7 @@ const App = () => {
         );
 
         console.log("Going to pop wallet now to pay gas...");
-        let nftTxn = await connectedContract.airDrop(addresses_array);
+        let nftTxn = await connectedContract.airDrop(addresses_array, mintID);
 
         console.log("Mining...please wait.");
         await nftTxn.wait();
@@ -151,7 +153,7 @@ const App = () => {
     }
   };
 
-//管理者を追加する
+//管理者を追加する(4種類のロール)
 const AddAdmin = async(event) => {
   event.preventDefault();
   try {
@@ -166,9 +168,23 @@ const AddAdmin = async(event) => {
         signer
       );
       console.log(adminAddress);
-      
-      let nftTxn = await connectedContract.addAdmin(adminAddress);
+      let DefaultRole = await connectedContract.DEFAULT_ADMIN_ROLE();
+      let nftTxn = await connectedContract.grantRole(DefaultRole, adminAddress);
       await nftTxn.wait();
+
+      let SetterRole = await connectedContract.URI_SETTER_ROLE();
+      nftTxn = await connectedContract.grantRole(SetterRole, adminAddress);
+      await nftTxn.wait();
+
+      let PauserRole = await connectedContract.PAUSER_ROLE();
+      nftTxn = await connectedContract.grantRole(PauserRole, adminAddress);
+      await nftTxn.wait();
+
+      let MinterRole = await connectedContract.MINTER_ROLE();
+      nftTxn = await connectedContract.grantRole(MinterRole, adminAddress);
+      await nftTxn.wait();
+
+
     } else {
       console.log("Ethereum object doesn't exist!");
     }
@@ -194,8 +210,22 @@ const DelAdmin = async(event) => {
       );
       console.log(adminAddress);
       
-      let nftTxn = await connectedContract.delAdmin(adminAddress);
+      let DefaultRole = await connectedContract.DEFAULT_ADMIN_ROLE();
+      let nftTxn = await connectedContract.revokeRole(DefaultRole, adminAddress);
       await nftTxn.wait();
+
+      let SetterRole = await connectedContract.URI_SETTER_ROLE();
+      nftTxn = await connectedContract.revokeRole(SetterRole, adminAddress);
+      await nftTxn.wait();
+
+      let PauserRole = await connectedContract.PAUSER_ROLE();
+      nftTxn = await connectedContract.revokeRole(PauserRole, adminAddress);
+      await nftTxn.wait();
+
+      let MinterRole = await connectedContract.MINTER_ROLE();
+      nftTxn = await connectedContract.revokeRole(MinterRole, adminAddress);
+      await nftTxn.wait();
+
     } else {
       console.log("Ethereum object doesn't exist!");
     }
@@ -221,7 +251,8 @@ const DelAdmin = async(event) => {
         );
         console.log(adminAddress);
         //console.log("Going to pop wallet now to pay gas...");
-        let nftTxn = await connectedContract.checkAdmin(adminAddress);
+        let DefaultRole = await connectedContract.DEFAULT_ADMIN_ROLE();
+        let nftTxn = await connectedContract.hasRole(DefaultRole, adminAddress);
 
         //console.log("Mining...please wait.");
         //await nftTxn.wait();
@@ -257,7 +288,10 @@ const DelAdmin = async(event) => {
 
   // 配布先アドレスの貼り付け欄、 AirDropボタンをレンダリングするメソッドを定義します。
   const renderMintUI = () => (
-    <><p className="normal-text">配布したい宛先のウォレットアドレスを入力</p><p className="normal-text">スプレッドシートからコピペOK</p>
+    <>
+    <p className="normal-text">配布するSBTのIDを入力(0,1,2・・・)</p>
+    <input type="text" name="mintID" id="mintID" size="10" onChange={(e) => setMintID(e.target.value)}></input><br></br><br></br>
+    <p className="normal-text">配布したい宛先のウォレットアドレスを入力</p><p className="normal-text">スプレッドシートからコピペOK</p>
     <form method="post">
       <textarea name="dist_address" id="dist_address" cols="42" rows="10" onChange={(e) => setAddresses(e.target.value)} placeholder="0xabc...&#13;0xdef..."></textarea><br></br><br></br>
       <button
