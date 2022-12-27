@@ -15,7 +15,7 @@ const OPENSEA_LINK = "";
 const TOTAL_MINT_COUNT = 50;
 
 // コトントラクトアドレスをCONTRACT_ADDRESS変数に格納
-const CONTRACT_ADDRESS = "0x512757897CBECf9E1669ADF5B21D5E5ca3ef92a6";
+const CONTRACT_ADDRESS = "0xd5e60e8D9652b9AdfB1A1B539b6F6D4b2e514F77";
 
 const App = () => {
   // ユーザーのウォレットアドレスを格納するために使用する状態変数を定義します。
