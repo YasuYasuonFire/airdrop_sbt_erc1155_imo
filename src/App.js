@@ -7,7 +7,7 @@ import { ethers } from "ethers";
 import React, { useEffect, useState } from "react";
 
 import twitterLogo from "./assets/twitter-logo.svg";
-import MeetingSBT from "./utils/MeetingSBT.json";
+import LabEventSBT from "./utils/LabEventSBT.json";
 
 const TWITTER_HANDLE = "YasuYasu_onFire";
 const TWITTER_LINK = `https://twitter.com/${TWITTER_HANDLE}`;
@@ -43,7 +43,7 @@ const App = () => {
         const signer = provider.getSigner();
         const connectedContract = new ethers.Contract(
           CONTRACT_ADDRESS,
-          MeetingSBT.abi,
+          LabEventSBT.abi,
           signer
         );
 
@@ -132,7 +132,7 @@ const App = () => {
         const signer = provider.getSigner();
         const connectedContract = new ethers.Contract(
           CONTRACT_ADDRESS,
-          MeetingSBT.abi,
+          LabEventSBT.abi,
           signer
         );
 
@@ -164,7 +164,7 @@ const AddAdmin = async(event) => {
       const signer = provider.getSigner();
       const connectedContract = new ethers.Contract(
         CONTRACT_ADDRESS,
-        MeetingSBT.abi,
+        LabEventSBT.abi,
         signer
       );
       console.log(adminAddress);
@@ -205,7 +205,7 @@ const DelAdmin = async(event) => {
       const signer = provider.getSigner();
       const connectedContract = new ethers.Contract(
         CONTRACT_ADDRESS,
-        MeetingSBT.abi,
+        LabEventSBT.abi,
         signer
       );
       console.log(adminAddress);
@@ -246,7 +246,7 @@ const DelAdmin = async(event) => {
         //const signer = provider.getSigner();
         const connectedContract = new ethers.Contract(
           CONTRACT_ADDRESS,
-          MeetingSBT.abi,
+          LabEventSBT.abi,
           provider
         );
         console.log(adminAddress);
